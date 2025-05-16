@@ -1,0 +1,1 @@
+# YADRO-Impulse-2025-Telecom-DevOps
