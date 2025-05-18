@@ -1,0 +1,6 @@
+- name: установка Docker и запуск контейнера
+  hosts: local
+  become: yes
+  roles:
+    - docker_setup
+    - run_container

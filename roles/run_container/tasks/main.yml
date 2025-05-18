@@ -1,0 +1,52 @@
+- name: копирование на хост
+  copy:
+    src: "{{ item }}"
+    dest: /tmp/{{ item }}
+  loop:
+    - logger.py
+    - Dockerfile
+
+- name: сборка Dockerа
+  community.docker.docker_image:
+    name: my-logger
+    source: build
+    build:
+      path: /tmp
+    tag: latest
+    force_source: yes
+
+- name: запуск
+  community.docker.docker_container:
+    name: test-logger
+    image: my-logger:latest
+    state: started
+    auto_remove: false
+    detach: false
+
+- name: ожидание выполнения скрипта
+  wait_for:
+    timeout: 10
+
+- name: проверка контейнера
+  shell: docker wait test-logger
+  register: container_exit_code
+  changed_when: false
+  ignore_errors: yes 
+
+- name: вывод кода завершения
+  debug:
+    var: container_exit_code.stdout
+
+- name: проверка успешности выполнения
+  fail:
+    msg: "Контейнер завершился с ошибкой!"
+  when: container_exit_code.stdout != "0" and container_exit_code.stdout != ""
+
+- name: получение логов контейнера
+  shell: docker logs test-logger 2>&1
+  register: container_logs
+  changed_when: false
+
+- name: вывод логов
+  debug:
+    var: container_logs.stdout_lines

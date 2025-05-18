@@ -1,13 +1,11 @@
 import requests
 import logging
+import sys
 
-# Настройка логирования
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s',handlers=[logging.StreamHandler(sys.stdout)])
 
-# Список тестовых кодов статуса для проверки
 status_codes = [200, 301, 100, 404, 500]
 
-# Функция обработки ответа
 def process_response(code):
     url = f"https://httpstat.us/{code}"
     try:
@@ -23,7 +21,11 @@ def process_response(code):
     except Exception as e:
         logging.error(f"Exception occurred: {e}")
 
-# Основной блок выполнения
 if __name__ == "__main__":
-    for code in status_codes:
-        process_response(code)
+    try:
+        for code in status_codes:
+            process_response(code)
+        exit(0)
+    except Exception as e:
+        logging.error(f"Fatal error: {e}")
+        exit(1) 
